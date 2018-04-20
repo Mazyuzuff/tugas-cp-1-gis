@@ -32,7 +32,7 @@ r.symbols.append(polygon_symbolizer)
 
 s.rules.append(r)
 m.append_style('yusuf1',s)
-ds = mapnik.Shapefile(file="D:\cp 1 gis 200 point\INDONESIA_PROP.shp")
+ds = mapnik.Shapefile(file="D:\cp1-gis\INDONESIA_PROP.shp")
 layer = mapnik.Layer('peta')
 layer.datasource = ds
 layer.styles.append('yusuf1')
@@ -58,7 +58,7 @@ r.symbols.append(basinsLabels)
 
 s.rules.append(r)
 m.append_style('yusuf2',s)
-ds = mapnik.Shapefile(file="D:\cp 1 gis 200 point\cuks.shp")
+ds = mapnik.Shapefile(file="D:\cp1-gis\cuks.shp")
 layer = mapnik.Layer('peta')
 layer.datasource = ds
 layer.styles.append('yusuf2')
@@ -77,6 +77,23 @@ m.layers.append(layer)
 #layer.datasource = ds
 #layer.styles.append('yusuf3')
 #m.layers.append(layer)
+m.append_style('yusuf',s)
+POSTGIS_TABLE =dict(
+    host='localhost',
+    port=5432,
+    user='postgres',
+    password="1",
+    dbname='yusuf',
+
+        table='(select ST_Buffer(ST_Centroid(geom),1) as geom,point from yusufgis)as gis',
+)
+ds = mapnik.PostGIS(**POSTGIS_TABLE)
+layer = mapnik.Layer('peta')
+layer.datasource = ds
+layer.styles.append('yusuf')
+m.layers.append(layer)
+
+
 
 
 
