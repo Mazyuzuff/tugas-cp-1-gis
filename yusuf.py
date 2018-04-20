@@ -18,7 +18,7 @@ POSTGIS_TABLE = dict(
     password='1',
     dbname='yusuf',
 
-    table='(select ST_LineMerge(ST_AsText(geom)) as geom, point from yusufgis) as coba',)
+    table='(select ST_Buffer(ST_Centroid(geom),1) as geom, point from yusufgis) as coba',)
 LAYER_NAME = 'coba'
 
 
@@ -110,31 +110,19 @@ def render_tile(layer, z, x, y):
     s = mapnik.Style()
     r = mapnik.Rule()
 
-    basinsLabels = mapnik.TextSymbolizer(mapnik.Expression('[point]'), 'DejaVu Sans Bold',3,mapnik.Color('red'))
-    basinsLabels.halo_fill = mapnik.Color('yellow')
-    basinsLabels.halo_radius = 2
-    r.symbols.append(basinsLabels)
-
-    point_sym = mapnik.PointSymbolizer()
-    point_sym.allow_overlap = True
-    point_sym.opacity = 0.5
-    point_sym.file = ()
-    r.symbols.append(point_sym)
-
     line_symbolizer = mapnik.LineSymbolizer(mapnik.Color('red'),1)
+    line_symbolizer.stroke_widht = 5.0
     r.symbols.append(line_symbolizer)
-    point = mapnik.PointSymbolizer()
-    r.symbols.append(point)
     s.rules.append(r)
 
 
     m.append_style('yusuf2', s)
     # Initialize layer from PostGIS table
     ds = mapnik.PostGIS(**POSTGIS_TABLE)
-    layer2 = mapnik.Layer(LAYER_NAME)
-    layer2.datasource = ds
-    layer2.styles.append('yusuf2')
-    m.layers.append(layer2)
+    layer = mapnik.Layer(LAYER_NAME)
+    layer.datasource = ds
+    layer.styles.append('yusuf2')
+    m.layers.append(layer)
 
     m.zoom_all()
 
@@ -157,7 +145,7 @@ def render_tile(layer, z, x, y):
 
 
 def make_app():
-    app = Flask('yusuf')
+    app = Flask('yusuf.py')
     app.register_blueprint(tileserver, url_prefix='/tiles')
     app.register_blueprint(web_ui, url_prefix='')
     return app
